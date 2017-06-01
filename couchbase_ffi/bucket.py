@@ -225,7 +225,8 @@ class Bucket(object):
             '_chained_endure': executors.DurabilityChainExecutor(self),
             'observe': executors.ObserveExecutor(self),
             'stats': executors.StatsExecutor(self),
-            '_rget': executors.GetReplicaExecutor(self)
+            '_rget': executors.GetReplicaExecutor(self),
+            'lookup_in': executors.LookupInExecutor(self)
         }
 
         self._install_cb(C.LCB_CALLBACK_DEFAULT, '_default')
@@ -477,7 +478,7 @@ class Bucket(object):
 
     _VALUE_METHS = ['upsert', 'insert', 'replace', 'append', 'prepend']
     _KEY_METHS = ['get', 'lock', 'touch', 'remove', 'counter',
-                  'observe', 'endure', '_rget', '_unlock']
+                  'observe', 'endure', '_rget', '_unlock', 'lookup_in']
 
     for name in _VALUE_METHS + _KEY_METHS:
         n_single = name

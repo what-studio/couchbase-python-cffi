@@ -343,6 +343,9 @@ class BaseExecutor(object):
         if not len(kv):
             raise ArgumentError.pyexc(obj=kv, message="No items in container")
 
+        if isinstance(kv, tuple):
+            kv = kv[0]
+
         if isinstance(kv, dict):
             is_dict = True
             try:
@@ -544,6 +547,15 @@ class GetReplicaExecutor(GetExecutor):
         return C.lcb_rget3(self.instance, mres._cdata, self.c_command)
 
 
+class LookupInExecutor(BaseExecutor):
+    STRUCTNAME = 'lcb_CMDSUBDOC'
+    VALUES_ALLOWED = True
+
+    def make_result(self, key, value):
+        sr = _SDResult()
+        sr.key = key
+        sr._specs = value
+        return sr
 
 
 class LockExecutor(GetExecutor):
