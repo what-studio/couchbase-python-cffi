@@ -594,7 +594,7 @@ class MutateInExecutor(LookupInExecutor):
         op = spec[0]
         if op in [C.LCB_SDCMD_ARRAY_ADD_FIRST, C.LCB_SDCMD_ARRAY_ADD_LAST,
                   C.LCB_SDCMD_ARRAY_INSERT]:
-            # strip outer [] for array operations
+            # Strip outer [] for array operations
             if not value.startswith('[') or not value.endswith(']'):
                 raise ValueFormatError('Serialized MultiValue shows '
                                        'invalid JSON (maybe empty?)')
