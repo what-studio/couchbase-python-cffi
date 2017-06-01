@@ -11,6 +11,7 @@ from couchbase_ffi._rtconfig import PyCBC, pycbc_exc_lcb, pycbc_exc_enc, pycbc_e
 from couchbase_ffi.bufmanager import BufManager
 
 ffi, C = get_handle()
+bm = BufManager(ffi)
 
 
 class Options(dict):
@@ -564,7 +565,6 @@ class LookupInExecutor(BaseExecutor):
         path = self.parent._tc.encode_key(path)
         sdspec.sdcmd = op
         sdspec.options = flags
-        bm = BufManager(ffi)
         c_path, c_len = bm.new_cbuf(path)
         C._Cb_sdspec_set_path(sdspec, c_path, c_len)
 
@@ -586,7 +586,6 @@ class MutateInExecutor(LookupInExecutor):
         super(MutateInExecutor, self).convert_spec(spec, sdspec)
         value = spec[3]
         value, __ = self.parent._tc.encode_value(value, FMT_JSON)
-        bm = BufManager(ffi)
         c_value, c_len = bm.new_cbuf(value)
         op = spec[0]
         if op in [C.LCB_SDCMD_ARRAY_ADD_FIRST,
@@ -792,7 +791,6 @@ class StatsExecutor(BaseExecutor):
     STRUCTNAME = 'lcb_CMDSTATS'
 
     def __run_stat(self, k, mres):
-        bm = BufManager(ffi)
         if k:
             if not isinstance(k, basestring):
                 raise pycbc_exc_args('Stats arguments must be strings only!')
