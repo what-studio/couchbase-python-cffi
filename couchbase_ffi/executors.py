@@ -5,7 +5,7 @@ from couchbase.exceptions import ValueFormatError, ArgumentError, CouchbaseError
 from couchbase.items import ItemCollection
 
 from couchbase_ffi.result import (OperationResult, ValueResult)
-from couchbase_ffi.constants import FMT_UTF8
+from couchbase_ffi.constants import FMT_JSON, FMT_UTF8
 from couchbase_ffi._cinit import get_handle
 from couchbase_ffi._rtconfig import PyCBC, pycbc_exc_lcb, pycbc_exc_enc, pycbc_exc_args
 from couchbase_ffi.bufmanager import BufManager
@@ -558,10 +558,12 @@ class LookupInExecutor(BaseExecutor):
         return sr
 
     def convert_spec(self, spec, sdspec):
-        op, path, flags = spec
+        op = spec[0]
+        path = spec[1]
+        flags = spec[2]
         path = self.parent._tc.encode_key(path)
-        sdspec.sdcmd = op  # int
-        sdspec.options = flags  # unsigned
+        sdspec.sdcmd = op
+        sdspec.options = flags
         bm = BufManager(ffi)
         c_path, c_len = bm.new_cbuf(path)
         C._Cb_sdspec_set_path(sdspec, c_path, c_len)
@@ -576,6 +578,25 @@ class LookupInExecutor(BaseExecutor):
             spec, sdspec = specs[x], sdspecs[x]
             self.convert_spec(spec, ffi.addressof(sdspec))
         return C.lcb_subdoc3(self.instance, mres._cdata, self.c_command)
+
+
+class MutateInExecutor(LookupInExecutor):
+
+    def convert_spec(self, spec, sdspec):
+        super(MutateInExecutor, self).convert_spec(spec, sdspec)
+        value = spec[3]
+        value, __ = self.parent._tc.encode_value(value, FMT_JSON)
+        bm = BufManager(ffi)
+        c_value, c_len = bm.new_cbuf(value)
+        op = spec[0]
+        if op in [C.LCB_SDCMD_ARRAY_ADD_FIRST,
+                  C.LCB_SDCMD_ARRAY_ADD_LAST,
+                  C.LCB_SDCMD_ARRAY_INSERT]:
+            # use multival
+            # NOTE: not implemented yet
+            pass
+
+        C._Cb_sdspec_set_value(sdspec, c_value, c_len)
 
 
 class LockExecutor(GetExecutor):

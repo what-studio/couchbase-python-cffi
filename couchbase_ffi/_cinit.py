@@ -24,6 +24,7 @@ CPP_INPUT = """
 void _Cb_set_key(void*,const void*, size_t);
 void _Cb_set_val(void*,const void*, size_t);
 void _Cb_sdspec_set_path(void*, const void*, size_t);
+void _Cb_sdspec_set_value(void*, const void*, size_t);
 void _Cb_do_callback(lcb_socket_t s, short events, lcb_ioE_callback cb, void *arg);
 void memset(void*,int,int);
 """
@@ -47,6 +48,9 @@ void _Cb_set_val(void *cmd, const void *val, size_t nval) {
 }
 void _Cb_sdspec_set_path(void *sdspec, const void *path, size_t npath) {
     LCB_SDSPEC_SET_PATH((lcb_SDSPEC*)sdspec, path, npath);
+}
+void _Cb_sdspec_set_value(void *sdspec, const void *value, size_t nvalue) {
+    LCB_SDSPEC_SET_VALUE((lcb_SDSPEC*)sdspec, value, nvalue);
 }
 void _Cb_do_callback(lcb_socket_t s, short events, lcb_ioE_callback cb, void *arg) {
     cb(s, events, arg);
