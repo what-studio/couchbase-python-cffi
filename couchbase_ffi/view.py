@@ -20,13 +20,13 @@ def buf2str(v, n):
 
 
 class ViewResult(Result):
-    def __init__(self, ddoc, view, options, include_docs=False):
+    def __init__(self, ddoc, view, options, flags):
         self._c_command = ffi.new('lcb_CMDVIEWQUERY*')
         self._c_handle = ffi.new('lcb_VIEWHANDLE*')
         self._ddoc = ddoc
         self._view = view
         self._options = options
-        self._include_docs = include_docs
+        self._flags = flags
         self._parent = None
         self.rows = []
         self._rows_per_call = 0
@@ -66,8 +66,7 @@ class ViewResult(Result):
         if pypost:
             cmd.postdata, cmd.npostdata = bm.new_cbuf(pypost)
 
-        if self._include_docs:
-            cmd.cmdflags |= C.LCB_CMDVIEWQUERY_F_INCLUDE_DOCS
+        cmd.cmdflags = self._flags
 
         self._c_command.handle = self._c_handle
 

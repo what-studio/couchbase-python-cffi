@@ -512,9 +512,9 @@ class Bucket(object):
     # noinspection PyUnresolvedReferences
     _rgetix_multi = _rget_multi
 
-    def _view_request(self, design, view, options, include_docs):
+    def _view_request(self, design, view, options, _flags):
         self._chk_no_pipeline('View requests not valid in pipeline mode')
-        res = ViewResult(design, view, options, include_docs)
+        res = ViewResult(design, view, options, _flags)
         mres = self._make_mres()
         mres[None] = res
         res._schedule(self, mres)
