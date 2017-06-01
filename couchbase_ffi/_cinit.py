@@ -19,9 +19,11 @@ CPP_INPUT = """
 #include <libcouchbase/api3.h>
 #include <libcouchbase/views.h>
 #include <libcouchbase/n1ql.h>
+#include <libcouchbase/subdoc.h>
 
 void _Cb_set_key(void*,const void*, size_t);
 void _Cb_set_val(void*,const void*, size_t);
+void _Cb_sdspec_set_path(void*, const void*, size_t);
 void _Cb_do_callback(lcb_socket_t s, short events, lcb_ioE_callback cb, void *arg);
 void memset(void*,int,int);
 """
@@ -35,12 +37,16 @@ VERIFY_INPUT = """
 #include <libcouchbase/api3.h>
 #include <libcouchbase/views.h>
 #include <libcouchbase/n1ql.h>
+#include <libcouchbase/subdoc.h>
 
 void _Cb_set_key(void *cmd, const void *key, size_t nkey) {
     LCB_CMD_SET_KEY((lcb_CMDBASE*)cmd, key, nkey);
 }
 void _Cb_set_val(void *cmd, const void *val, size_t nval) {
     LCB_CMD_SET_VALUE((lcb_CMDSTORE*)cmd, val, nval);
+}
+void _Cb_sdspec_set_path(void *sdspec, const void *path, size_t npath) {
+    LCB_SDSPEC_SET_PATH((lcb_SDSPEC*)sdspec, path, npath);
 }
 void _Cb_do_callback(lcb_socket_t s, short events, lcb_ioE_callback cb, void *arg) {
     cb(s, events, arg);

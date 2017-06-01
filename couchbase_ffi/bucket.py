@@ -202,6 +202,7 @@ class Bucket(object):
             'observe': ffi.callback(CALLBACK_DECL, self._observe_callback),
             'stats': ffi.callback(CALLBACK_DECL, self._stats_callback),
             'http': ffi.callback(CALLBACK_DECL, self._http_callback),
+            'sdlookup': ffi.callback(CALLBACK_DECL, self._sdlookup_callback),
             '_default': ffi.callback(CALLBACK_DECL, self._default_callback),
             '_bootstrap': ffi.callback('void(lcb_t,lcb_error_t)',
                                        self._bootstrap_callback),
@@ -238,6 +239,7 @@ class Bucket(object):
         self._install_cb(C.LCB_CALLBACK_OBSERVE, 'observe')
         self._install_cb(C.LCB_CALLBACK_STATS, 'stats')
         self._install_cb(C.LCB_CALLBACK_HTTP, 'http')
+        self._install_cb(C.LCB_CALLBACK_SDLOOKUP, 'sdlookup')
         C.lcb_set_bootstrap_callback(self._lcbh, self._bound_cb['_bootstrap'])
 
         # Set our properties
@@ -676,6 +678,17 @@ class Bucket(object):
             else:
                 result.value = buf[::]
 
+        self._chk_op_done(mres)
+
+    def _sdlookup_callback(self, instance, cbtype, resp):
+        result, mres = self._callback_common(instance, cbtype, resp)
+        resp = ffi.cast('lcb_RESPSUBDOC*', resp)
+        cur = ffi.new('lcb_SDENTRY*')
+        vii = ffi.new('size_t*')
+        while C.lcb_sdresult_next(resp, cur, vii):
+            buf = bytes(ffi.buffer(cur.value, cur.nvalue))
+            value = self._tc.decode_value(buf, FMT_JSON)
+            result._results.append((cur.status, value))
         self._chk_op_done(mres)
 
     def _remove_callback(self, instance, cbtype, resp):

@@ -4,10 +4,10 @@ from couchbase._pyport import long, basestring
 from couchbase.exceptions import ValueFormatError, ArgumentError, CouchbaseError
 from couchbase.items import ItemCollection
 
-from couchbase_ffi.result import (OperationResult, ValueResult, _SDResult)
+from couchbase_ffi.result import (OperationResult, ValueResult)
 from couchbase_ffi.constants import FMT_UTF8
 from couchbase_ffi._cinit import get_handle
-from couchbase_ffi._rtconfig import pycbc_exc_lcb, pycbc_exc_enc, pycbc_exc_args
+from couchbase_ffi._rtconfig import PyCBC, pycbc_exc_lcb, pycbc_exc_enc, pycbc_exc_args
 from couchbase_ffi.bufmanager import BufManager
 
 ffi, C = get_handle()
@@ -551,11 +551,29 @@ class LookupInExecutor(BaseExecutor):
     STRUCTNAME = 'lcb_CMDSUBDOC'
     VALUES_ALLOWED = True
 
-    def make_result(self, key, value):
-        sr = _SDResult()
+    def make_result(self, key, specs):
+        sr = PyCBC.sd_result_type()
         sr.key = key
-        sr._specs = value
+        sr._specs = specs
         return sr
+
+    def convert_spec(self, spec, sdspec):
+        op, path, flags = spec
+        path = self.parent._tc.encode_key(path)
+        sdspec.sdcmd = op  # int
+        sdspec.options = flags  # unsigned
+        bm = BufManager(ffi)
+        c_path, c_len = bm.new_cbuf(path)
+        C._Cb_sdspec_set_path(sdspec, c_path, c_len)
+
+    def submit_single(self, c_key, c_len, specs, item, key_options, global_options, mres):
+        C._Cb_set_key(self.c_command, c_key, c_len)
+        sdspec = ffi.new('lcb_SDSPEC*')
+        spec = specs[0]
+        self.c_command.specs = sdspec
+        self.c_command.nspecs = 1
+        self.convert_spec(spec, sdspec)
+        return C.lcb_subdoc3(self.instance, mres._cdata, self.c_command)
 
 
 class LockExecutor(GetExecutor):
