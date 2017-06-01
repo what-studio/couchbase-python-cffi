@@ -76,7 +76,6 @@ class ViewResult(Result):
             raise pycbc_exc_lcb(rc)
 
     def _handle_done(self, resp, mres):
-        self.done = True
         self._c_handle = None
         if resp.rc:
             if resp.rc == C.LCB_HTTP_ERROR:
@@ -98,6 +97,11 @@ class ViewResult(Result):
             if not self.value and resp.htresp.nbody:
                 self.value = buf2str(resp.htresp.body, resp.htresp.nbody)
             self.http_status = resp.htresp.htstatus
+
+        if self._parent._is_async:
+            self._invoke_async(mres, is_final=True)
+
+        self.done = True
 
         if self._parent._is_async:
             try:
