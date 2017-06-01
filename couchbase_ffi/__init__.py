@@ -11,7 +11,7 @@ def _mk_imp_override(srcname, replacement):
     :param replacement: The object which should act as the replacement
     """
     class DummyImporter(object):
-        def find_module(self, fullname, path):
+        def find_module(self, fullname, path=None):
             if fullname == srcname:
                 return self
 
