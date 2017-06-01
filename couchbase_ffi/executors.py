@@ -344,10 +344,15 @@ class BaseExecutor(object):
         if not len(kv):
             raise ArgumentError.pyexc(obj=kv, message="No items in container")
 
-        if isinstance(kv, tuple):
+        if isinstance(kv, tuple) and len(kv) == 1 and isinstance(kv[0], dict):
+            # For sub-document specs
             kv = kv[0]
-
-        if isinstance(kv, dict):
+            is_dict = True
+            try:
+                kviter = kv.iteritems()
+            except AttributeError:
+                kviter = iter(kv.items())
+        elif isinstance(kv, dict):
             is_dict = True
             try:
                 kviter = kv.iteritems()
