@@ -568,11 +568,13 @@ class LookupInExecutor(BaseExecutor):
 
     def submit_single(self, c_key, c_len, specs, item, key_options, global_options, mres):
         C._Cb_set_key(self.c_command, c_key, c_len)
-        sdspec = ffi.new('lcb_SDSPEC*')
-        spec = specs[0]
-        self.c_command.specs = sdspec
-        self.c_command.nspecs = 1
-        self.convert_spec(spec, sdspec)
+        nspecs = len(specs)
+        sdspecs = ffi.new('lcb_SDSPEC[]', nspecs)
+        self.c_command.specs = sdspecs
+        self.c_command.nspecs = nspecs
+        for x in range(nspecs):
+            spec, sdspec = specs[x], sdspecs[x]
+            self.convert_spec(spec, ffi.addressof(sdspec))
         return C.lcb_subdoc3(self.instance, mres._cdata, self.c_command)
 
 
