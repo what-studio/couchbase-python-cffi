@@ -4,7 +4,7 @@ from couchbase._pyport import long, basestring
 from couchbase.exceptions import ValueFormatError, ArgumentError, CouchbaseError
 from couchbase.items import ItemCollection
 
-from couchbase_ffi.result import (OperationResult, ValueResult)
+from couchbase_ffi.result import (OperationResult, ValueResult, _SDResult)
 from couchbase_ffi.constants import FMT_UTF8
 from couchbase_ffi._cinit import get_handle
 from couchbase_ffi._rtconfig import pycbc_exc_lcb, pycbc_exc_enc, pycbc_exc_args

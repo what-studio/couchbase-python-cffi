@@ -70,7 +70,8 @@ def _stage2_bootstrap():
         ValueResult,
         OperationResult,
         HttpResult,
-        AsyncResult
+        AsyncResult,
+        _SDResult,
     )
     from couchbase_ffi.n1ql import _N1QLParams
 

@@ -49,6 +49,16 @@ class ValueResult(OperationResult):
         self.flags = 0
 
 
+class _SDResult(OperationResult):
+    # __slots__ = ['cas']
+    _fldprops = PYCBC_RESFLD_KEY | PYCBC_RESFLD_CAS
+
+    def __init__(self):
+        super(_SDResult, self).__init__()
+        self._results = []
+        self._specs = []
+
+
 class Item(ValueResult):
     def __getattr__(self, item):
         # This is needed because in C we just check the C field; however
