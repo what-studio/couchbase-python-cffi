@@ -586,15 +586,15 @@ class MutateInExecutor(LookupInExecutor):
         super(MutateInExecutor, self).convert_spec(spec, sdspec)
         value = spec[3]
         value, __ = self.parent._tc.encode_value(value, FMT_JSON)
-        c_value, c_len = bm.new_cbuf(value)
         op = spec[0]
-        if op in [C.LCB_SDCMD_ARRAY_ADD_FIRST,
-                  C.LCB_SDCMD_ARRAY_ADD_LAST,
+        if op in [C.LCB_SDCMD_ARRAY_ADD_FIRST, C.LCB_SDCMD_ARRAY_ADD_LAST,
                   C.LCB_SDCMD_ARRAY_INSERT]:
-            # use multival
-            # NOTE: not implemented yet
-            pass
-
+            # strip outer [] for array operations
+            if not value.startswith('[') or not value.endswith(']'):
+                raise ValueFormatError('Serialized MultiValue shows '
+                                       'invalid JSON (maybe empty?)')
+            value = value[1:-1]
+        c_value, c_len = bm.new_cbuf(value)
         C._Cb_sdspec_set_value(sdspec, c_value, c_len)
 
 
