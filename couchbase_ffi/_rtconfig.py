@@ -44,6 +44,8 @@ class _PyCBC_Class(object):
         self.fmt_auto = None
         self.pypy_mres_factory = None
         self.view_path_helper = None
+        self.sd_result_type = None
+        self.sd_multival_type = None
 
     def configure(self, key, value):
         if not hasattr(self, key):
