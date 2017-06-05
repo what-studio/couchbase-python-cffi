@@ -26,6 +26,7 @@ void _Cb_set_val(void*,const void*, size_t);
 void _Cb_sdspec_set_path(void*, const void*, size_t);
 void _Cb_sdspec_set_value(void*, const void*, size_t);
 void _Cb_do_callback(lcb_socket_t s, short events, lcb_ioE_callback cb, void *arg);
+void _Cb_n1ql_query_initcmd(lcb_CMDN1QL*, const char*, const int, lcb_N1QLCALLBACK);
 void memset(void*,int,int);
 """
 
@@ -55,6 +56,14 @@ void _Cb_sdspec_set_value(void *sdspec, const void *value, size_t nvalue) {
 void _Cb_do_callback(lcb_socket_t s, short events, lcb_ioE_callback cb, void *arg) {
     cb(s, events, arg);
 }
+void _Cb_n1ql_query_initcmd(lcb_CMDN1QL *nq, const char *params, const int nparams,
+                            lcb_N1QLCALLBACK callback) {
+    nq->content_type = "application/json";
+    nq->callback = callback;
+    nq->query = params;
+    nq->nquery = nparams;
+}
+
 LIBCOUCHBASE_API
 lcb_error_t
 lcb_n1p_synctok_for(lcb_N1QLPARAMS *params, lcb_t instance,

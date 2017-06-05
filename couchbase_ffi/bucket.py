@@ -11,6 +11,7 @@ from couchbase_ffi.view import ViewResult
 from couchbase_ffi.http import HttpRequest
 from couchbase_ffi.iops import IOPSWrapper
 from couchbase_ffi.lcbcntl import CNTL_VTYPE_MAP
+from couchbase_ffi.n1ql import N1QLResult
 from couchbase_ffi.bufmanager import BufManager
 from couchbase_ffi._rtconfig import (
     PyCBC, pycbc_exc_enc, pycbc_exc_args, pycbc_exc_lcb)
@@ -515,6 +516,15 @@ class Bucket(object):
     def _view_request(self, design, view, options, _flags):
         self._chk_no_pipeline('View requests not valid in pipeline mode')
         res = ViewResult(design, view, options, _flags)
+        mres = self._make_mres()
+        mres[None] = res
+        res._schedule(self, mres)
+        return mres
+
+    def _n1ql_query(self, params, prepare=0, cross_bucket=0):
+        self._chk_no_pipeline('N1QL queries cannot be executed '
+                              'in pipeline context')
+        res = N1QLResult(params, prepare, cross_bucket)
         mres = self._make_mres()
         mres[None] = res
         res._schedule(self, mres)
