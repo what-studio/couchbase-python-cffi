@@ -626,6 +626,7 @@ class Bucket(object):
             mres.invoke()
 
     def _chain_endure(self, optype, mres, result, dur):
+        mres._remaining -= 1
         persist_to, replicate_to = dur
         proc = self._executors['_chained_endure']
         try:
