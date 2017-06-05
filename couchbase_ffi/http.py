@@ -88,3 +88,14 @@ class HttpRequest(HttpResult):
                     mres._add_err(sys.exc_info())
                 result.http_data = buf
 
+        if self._parent._is_async:
+            try:
+                mres._maybe_throw()
+            except:
+                mres.errback(mres, *sys.exc_info())
+            else:
+                cb = mres.callback
+                if cb:
+                    cb(mres)
+            finally:
+                del self._parent
