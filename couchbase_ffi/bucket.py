@@ -644,7 +644,7 @@ class Bucket(object):
         _, mres = self._callback_common(*args)
         self._chk_op_done(mres)
 
-    def _callback_common(self, _, cbtype, resp):
+    def _callback_common(self, _, cbtype, resp, safe_rc=0):
         mres = ffi.from_handle(resp.cookie)
         buf = bytes(ffi.buffer(resp.key, resp.nkey))
         try:
@@ -654,7 +654,7 @@ class Bucket(object):
             raise pycbc_exc_enc(buf)
 
         result.rc = resp.rc
-        if resp.rc:
+        if resp.rc and resp.rc != safe_rc:
             mres._add_bad_rc(resp.rc, result)
         else:
             result.cas = resp.cas
@@ -695,7 +695,8 @@ class Bucket(object):
         self._chk_op_done(mres)
 
     def _subdoc_callback(self, instance, cbtype, resp):
-        result, mres = self._callback_common(instance, cbtype, resp)
+        result, mres = self._callback_common(instance, cbtype, resp,
+                                             safe_rc=C.LCB_SUBDOC_MULTI_FAILURE)
         resp = ffi.cast('lcb_RESPSUBDOC*', resp)
         cur = ffi.new('lcb_SDENTRY*')
         vii = ffi.new('size_t*')
