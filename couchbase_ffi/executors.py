@@ -589,6 +589,8 @@ class MutateInExecutor(LookupInExecutor):
 
     def convert_spec(self, spec, sdspec):
         super(MutateInExecutor, self).convert_spec(spec, sdspec)
+        if len(spec) < 4:
+            return
         value = spec[3]
         value, __ = self.parent._tc.encode_value(value, FMT_JSON)
         op = spec[0]
