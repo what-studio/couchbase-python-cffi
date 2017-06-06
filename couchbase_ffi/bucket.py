@@ -706,8 +706,8 @@ class Bucket(object):
             if cbtype == C.LCB_CALLBACK_SDMUTATE:
                 cur_index = cur.index
             else:
-                oix += 1
                 cur_index = oix
+                oix += 1
 
             if cur.status == C.LCB_SUCCESS and cur.nvalue != 0:
                 buf = bytes(ffi.buffer(cur.value, cur.nvalue))
