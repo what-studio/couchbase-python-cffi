@@ -602,6 +602,13 @@ class MutateInExecutor(LookupInExecutor):
         c_value, c_len = bm.new_cbuf(value)
         C._Cb_sdspec_set_value(sdspec, c_value, c_len)
 
+    def submit_single(self, c_key, c_len, specs, item, key_options, global_options, mres):
+        self.c_command.cas = get_cas(key_options, global_options, item)
+        self.c_command.exptime = get_ttl(key_options, global_options, item)
+        self.c_command.cmdflags |= global_options.get('_sd_doc_flags', 0)
+        return super(MutateInExecutor, self).submit_single(
+            c_key, c_len, specs, item, key_options, global_options, mres)
+
 
 class LockExecutor(GetExecutor):
     IS_LOCK = True
