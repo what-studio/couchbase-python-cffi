@@ -700,12 +700,36 @@ class Bucket(object):
         resp = ffi.cast('lcb_RESPSUBDOC*', resp)
         cur = ffi.new('lcb_SDENTRY*')
         vii = ffi.new('size_t*')
+        oix = 0
         while C.lcb_sdresult_next(resp, cur, vii):
+
+            if cbtype == C.LCB_CALLBACK_SDMUTATE:
+                cur_index = cur.index
+            else:
+                oix += 1
+                cur_index = oix
+
             if cur.status == C.LCB_SUCCESS and cur.nvalue != 0:
                 buf = bytes(ffi.buffer(cur.value, cur.nvalue))
-                value = self._tc.decode_value(buf, FMT_JSON)
+                try:
+                    value = self._tc.decode_value(buf, FMT_JSON)
+                except:
+                    try:
+                        raise pycbc_exc_enc(obj=buf)
+                    except PyCBC.default_exception:
+                        mres._add_err(sys.exc_info())
+                        break
             else:
                 value = None
+
+            if cur.status != C.LCB_SUCCESS:
+                if cbtype == C.LCB_CALLBACK_SDMUTATE or cur.status != C.LCB_SUBDOC_PATH_ENOENT:
+                    spec = result._specs[cur_index]
+                    try:
+                        raise pycbc_exc_lcb(cur.status, 'Subcommand failure', spec)
+                    except PyCBC.default_exception:
+                        mres._add_err(sys.exc_info())
+
             result._results.append((cur.status, value))
         self._chk_op_done(mres)
 
